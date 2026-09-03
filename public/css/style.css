@@ -1,0 +1,171 @@
+/* Estilos Globais - Torneio de Matemática */
+:root {
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --serie-a: #f59e0b;
+  --serie-a-dark: #b45309;
+  --serie-b: #3b82f6;
+  --serie-b-dark: #1d4ed8;
+  --serie-c: #10b981;
+  --serie-c-dark: #047857;
+  --bg-dark: #0f172a;
+  --card-dark: #1e293b;
+  --border-dark: #334155;
+  --text-light: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  color: var(--text-light);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Glassmorphism containers */
+.glass-card {
+  background: rgba(30, 41, 59, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+}
+
+.glass-card-hover {
+  transition: all 0.25s ease;
+}
+.glass-card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Badges das Séries */
+.badge-serie-a {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.badge-serie-b {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.badge-serie-c {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* Avatares dos Estudantes */
+.avatar-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.avatar-large {
+  width: 80px;
+  height: 80px;
+  font-size: 2.25rem;
+}
+
+/* Animação da Dica de Ouro */
+@keyframes pulseGold {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6); }
+  70% { box-shadow: 0 0 0 18px rgba(245, 158, 11, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.gold-hint-box {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.25));
+  border: 2px solid #f59e0b;
+  animation: pulseGold 2s infinite;
+}
+
+/* Animação de Rebaixamento / Transferência */
+@keyframes slideInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Botões modernos */
+.btn-gradient-primary {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  transition: all 0.2s ease;
+}
+.btn-gradient-primary:hover {
+  background: linear-gradient(135deg, #4338ca, #6d28d9);
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-gradient-gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  transition: all 0.2s ease;
+}
+.btn-gradient-gold:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: scale(1.02);
+}
+
+/* Pódio */
+.podium-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  border-radius: 12px 12px 0 0;
+  transition: transform 0.3s;
+}
+.podium-step:hover {
+  transform: scale(1.03);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}

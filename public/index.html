@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Torneio de Matemática | Arena de Duelos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col min-h-screen">
+
+  <!-- Navbar -->
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-xl shadow-lg shadow-indigo-500/30">
+          <i class="fa-solid fa-calculator text-white"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-300 to-amber-300">
+            Torneio de Matemática
+          </h1>
+          <p class="text-xs text-slate-400">Arena de Duelos com Sistema de Séries A, B e C</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="tutorial.html" class="px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-amber-400 flex items-center gap-1.5 transition border border-amber-500/20 shadow">
+          <i class="fa-solid fa-film"></i> Ver Tutorial Animado
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="flex-1 max-w-6xl mx-auto px-4 py-12 flex flex-col justify-center">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-4">
+        <i class="fa-solid fa-trophy text-amber-400"></i> Gamificação Escolar Inclusiva
+      </div>
+      <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+        Duelos Matemáticos 1x1 com <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-orange-400 to-amber-200">Rebaixamento Série A, B e C</span>
+      </h2>
+      <p class="text-slate-300 text-base md:text-lg leading-relaxed">
+        Nenhum estudante fica de fora! Quem perde na Série A avança para a Série B, e depois para a Série C. 
+        Com validação de IA, sistema de dicas na 2ª tentativa se ambos errarem e dados individualizados.
+      </p>
+    </div>
+
+    <!-- Cards de Escolha de Papel -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto w-full">
+      
+      <!-- Card Professor -->
+      <a href="professor.html" class="glass-card glass-card-hover p-6 flex flex-col justify-between border-t-4 border-t-indigo-500 group">
+        <div>
+          <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-chalkboard-user"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+            Sou Professor
+            <i class="fa-solid fa-arrow-right text-xs text-indigo-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+          </h3>
+          <p class="text-sm text-slate-400 leading-relaxed mb-4">
+            Crie o torneio em segundos, cole a lista de alunos para gerar o chaveamento embaralhado, insira o banco de questões por texto e gere prompts de IA prontos.
+          </p>
+          <ul class="text-xs text-slate-300 space-y-1.5 mb-6">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Código de acesso instantâneo</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Gerador de Prompt IA (ChatGPT/Claude/Gemini)</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Gestão das Séries A, B e C com Pódio</li>
+          </ul>
+        </div>
+        <span class="w-full py-2.5 rounded-lg btn-gradient-primary text-center font-semibold text-sm shadow-md block">
+          Acessar Painel do Professor
+        </span>
+      </a>
+
+      <!-- Card Estudante -->
+      <a href="estudante.html" class="glass-card glass-card-hover p-6 flex flex-col justify-between border-t-4 border-t-amber-500 group">
+        <div>
+          <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-gamepad"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+            Sou Estudante
+            <i class="fa-solid fa-arrow-right text-xs text-amber-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+          </h3>
+          <p class="text-sm text-slate-400 leading-relaxed mb-4">
+            Insira o código fornecido pelo professor, veja apenas seu oponente e quantas vitórias faltam para o título. Duelo direto com cálculo e dicas!
+          </p>
+          <ul class="text-xs text-slate-300 space-y-1.5 mb-6">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Visão focada (sem distrações)</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Dica de ouro se ambos errarem a 1ª</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Segunda chance contínua (Série B e C)</li>
+          </ul>
+        </div>
+        <span class="w-full py-2.5 rounded-lg btn-gradient-gold text-center font-semibold text-sm shadow-md block">
+          Entrar na Partida
+        </span>
+      </a>
+
+      <!-- Card Tutorial -->
+      <a href="tutorial.html" class="glass-card glass-card-hover p-6 flex flex-col justify-between border-t-4 border-t-emerald-500 group">
+        <div>
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform">
+            <i class="fa-solid fa-play"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+            Como Jogar (Tutorial)
+            <i class="fa-solid fa-arrow-right text-xs text-emerald-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+          </h3>
+          <p class="text-sm text-slate-400 leading-relaxed mb-4">
+            Animação interativa passo a passo ideal para projetar na sala de aula e explicar as regras do jogo e do rebaixamento para os alunos.
+          </p>
+          <ul class="text-xs text-slate-300 space-y-1.5 mb-6">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Animação visual das fases</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Exemplo do duelo e da Dica IA</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-400"></i> Regra do Brasileirão explicada</li>
+          </ul>
+        </div>
+        <span class="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-center font-semibold text-sm shadow-md transition block">
+          Ver Tutorial Animado
+        </span>
+      </a>
+
+    </div>
+
+    <!-- Network Info Bar para Alunos Conectarem por Celular -->
+    <div id="networkInfoBox" class="mt-12 max-w-xl mx-auto w-full p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-center text-xs text-slate-400">
+      <div class="flex items-center justify-center gap-2 text-indigo-300 font-medium mb-1">
+        <i class="fa-solid fa-wifi"></i> Jogando em múltiplos dispositivos na sala de aula:
+      </div>
+      <p>
+        Os alunos conectados no mesmo Wi-Fi podem acessar diretamente por: 
+        <span id="lanUrl" class="font-mono text-amber-300 select-all font-bold">Carregando endereço de rede...</span>
+      </p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+    <p>Torneio de Matemática • Desenvolvido com IA Pedagógica & Sistema de Rebaixamento Gamificado</p>
+  </footer>
+
+  <script>
+    // Carrega o IP da rede local
+    fetch('/api/network-info')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('lanUrl').innerText = data.networkUrl;
+      })
+      .catch(() => {
+        document.getElementById('lanUrl').innerText = window.location.origin;
+      });
+  </script>
+</body>
+</html>

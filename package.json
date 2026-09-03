@@ -1,0 +1,17 @@
+{
+  "name": "torneio-matematica",
+  "version": "1.0.0",
+  "description": "Sistema de torneio de matemática em tempo real com chaveamento, rebaixamento de séries, tela focada para estudante, dicas e tutorial.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/engine.test.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}

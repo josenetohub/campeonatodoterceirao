@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutorial Animado | Como Funciona o Torneio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .tutorial-slide {
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .tutorial-slide.hidden-slide {
+      opacity: 0;
+      transform: scale(0.95) translateY(20px);
+      pointer-events: none;
+      position: absolute;
+      width: 100%;
+    }
+    .tutorial-slide.active-slide {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      position: relative;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur py-4 px-6 sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white text-lg">
+          <i class="fa-solid fa-film"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-bold text-white">Tutorial Animado do Torneio</h1>
+          <p class="text-xs text-slate-400">Aprenda as regras dos duelos, o botão Pronto e o Anti-Trapaça</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="autoPlayBtn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-play"></i> <span id="autoPlayLabel">Reproduzir Auto</span>
+        </button>
+        <a href="estudante.html" class="px-3.5 py-1.5 rounded-lg btn-gradient-gold text-xs font-bold transition flex items-center gap-1">
+          <i class="fa-solid fa-gamepad"></i> Ir para o Jogo
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container da Animação Interativa -->
+  <main class="flex-1 max-w-4xl mx-auto w-full px-4 py-8 flex flex-col justify-center">
+
+    <div class="glass-card p-6 md:p-10 relative overflow-hidden min-h-[520px] flex flex-col justify-between">
+      
+      <!-- Indicador de Passos no Topo -->
+      <div class="flex items-center justify-center gap-2 mb-6">
+        <span class="step-dot w-3 h-3 rounded-full bg-indigo-500 transition-all cursor-pointer" onclick="goToSlide(0)"></span>
+        <span class="step-dot w-3 h-3 rounded-full bg-slate-700 transition-all cursor-pointer" onclick="goToSlide(1)"></span>
+        <span class="step-dot w-3 h-3 rounded-full bg-slate-700 transition-all cursor-pointer" onclick="goToSlide(2)"></span>
+        <span class="step-dot w-3 h-3 rounded-full bg-slate-700 transition-all cursor-pointer" onclick="goToSlide(3)"></span>
+        <span class="step-dot w-3 h-3 rounded-full bg-slate-700 transition-all cursor-pointer" onclick="goToSlide(4)"></span>
+      </div>
+
+      <!-- SLIDE 1: O Início e o Botão "Pronto" -->
+      <div class="tutorial-slide active-slide space-y-6 text-center" id="slide0">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-serie-a text-xs uppercase font-bold">
+          Passo 1 • Preparação e Botão "Pronto"
+        </div>
+        <h2 class="text-2xl md:text-3xl font-black text-white">Prontos para o Duelo?</h2>
+        <p class="text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+          Ao entrar no duelo, você vê seu oponente. A pergunta <strong>só aparece quando os dois apertarem o botão "ESTOU PRONTO! 🚀"</strong>. Em seguida, inicia-se uma contagem regressiva de 3 segundos: <strong>3... 2... 1... VALENDO!</strong>
+        </p>
+
+        <div class="py-2 max-w-sm mx-auto p-4 rounded-xl bg-slate-900 border border-indigo-500/40 text-center space-y-2">
+          <span class="text-xs text-slate-400">Contagem Regressiva Sincronizada</span>
+          <div class="text-4xl font-black text-amber-400 font-mono animate-pulse">3... 2... 1...</div>
+          <span class="text-[11px] text-emerald-400 font-bold block">A pergunta aparece para os dois ao mesmo tempo!</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 2: Detecção Anti-Trapaça -->
+      <div class="tutorial-slide hidden-slide space-y-6 text-center" id="slide1">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs uppercase font-bold">
+          Passo 2 • Tecnologia Anti-Trapaça
+        </div>
+        <h2 class="text-2xl md:text-3xl font-black text-white">Não Saia da Aba! 🚨</h2>
+        <p class="text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+          O sistema monitora a visibilidade da tela. <strong>Se você trocar de aba, minimizar o navegador ou abrir outra janela</strong> (para pesquisar ou usar IA), o sistema decreta <strong>derrota instantânea por desclassificação</strong>!
+        </p>
+
+        <div class="max-w-md mx-auto p-4 rounded-xl bg-rose-950/40 border-2 border-rose-500 text-left space-y-2 shadow-xl">
+          <div class="flex items-center gap-2 text-rose-400 font-bold text-xs">
+            <i class="fa-solid fa-triangle-exclamation text-lg"></i> CARTÃO VERMELHO
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Mantenha o foco 100% na sua tela até enviar a resposta! A vitória será concedida automaticamente ao adversário em caso de saída.
+          </p>
+        </div>
+      </div>
+
+      <!-- SLIDE 3: Submissão Sincronizada e Dica -->
+      <div class="tutorial-slide hidden-slide space-y-6 text-center" id="slide2">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs uppercase font-bold">
+          Passo 3 • Comparação Justa e Dica
+        </div>
+        <h2 class="text-2xl md:text-3xl font-black text-white">Responda Sem Pressa!</h2>
+        <p class="text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+          Quem responde primeiro não elimina o adversário de imediato. A IA <strong>espera os dois responderem</strong> para comparar:
+        </p>
+
+        <div class="max-w-md mx-auto p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-left text-xs space-y-2">
+          <div class="flex items-center gap-2 text-emerald-400">
+            <i class="fa-solid fa-check"></i> <strong>1 acertou e 1 errou:</strong> O que acertou avança!
+          </div>
+          <div class="flex items-center gap-2 text-purple-400">
+            <i class="fa-solid fa-scale-balanced"></i> <strong>Ambos acertaram:</strong> Empate! Uma nova questão de desempate é gerada.
+          </div>
+          <div class="flex items-center gap-2 text-amber-400">
+            <i class="fa-solid fa-lightbulb"></i> <strong>Ambos erraram (1ª tent.):</strong> A <strong>Dica de Ouro</strong> é liberada para a 2ª tentativa!
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 4: Sistema Brasileirão (Séries A, B e C) -->
+      <div class="tutorial-slide hidden-slide space-y-6 text-center" id="slide3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs uppercase font-bold">
+          Passo 4 • Sistema Brasileirão
+        </div>
+        <h2 class="text-2xl md:text-3xl font-black text-white">Ninguém Fica de Fora!</h2>
+        <p class="text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+          Perdeu na Série A? Você é <strong>rebaixado para a Série B</strong> e continua lutando pelo Troféu Prata. Perdeu na Série B? Você disputa a <strong>Série C</strong> pelo Troféu Bronze!
+        </p>
+
+        <div class="flex items-center justify-center gap-3 max-w-lg mx-auto py-2">
+          <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/40 text-xs text-center w-28">
+            <span class="text-xl block mb-1">🥇</span>
+            <strong class="text-amber-400 block font-black">Série A</strong>
+            <span class="text-[10px] text-slate-400">Principal</span>
+          </div>
+
+          <div class="text-slate-500 text-xs flex flex-col items-center">
+            <span>Perdeu?</span>
+            <i class="fa-solid fa-arrow-right text-blue-400"></i>
+          </div>
+
+          <div class="p-3 rounded-xl bg-blue-500/10 border border-blue-500/40 text-xs text-center w-28">
+            <span class="text-xl block mb-1">🥈</span>
+            <strong class="text-blue-400 block font-black">Série B</strong>
+            <span class="text-[10px] text-slate-400">Superação</span>
+          </div>
+
+          <div class="text-slate-500 text-xs flex flex-col items-center">
+            <span>Perdeu?</span>
+            <i class="fa-solid fa-arrow-right text-emerald-400"></i>
+          </div>
+
+          <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/40 text-xs text-center w-28">
+            <span class="text-xl block mb-1">🥉</span>
+            <strong class="text-emerald-400 block font-black">Série C</strong>
+            <span class="text-[10px] text-slate-400">Raça</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 5: Campeões e Estatísticas -->
+      <div class="tutorial-slide hidden-slide space-y-6 text-center" id="slide4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs uppercase font-bold">
+          Passo 5 • Campeões de Todas as Séries
+        </div>
+        <h2 class="text-2xl md:text-3xl font-black text-white">Todos Competem até o Final!</h2>
+        <p class="text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+          No final, teremos campeões coroados para as Séries A, B e C, e um relatório pedagógico de desempenho individual para cada aluno.
+        </p>
+
+        <div class="pt-4">
+          <a href="estudante.html" class="px-8 py-3.5 rounded-xl btn-gradient-gold font-black text-sm shadow-xl shadow-amber-500/30 inline-flex items-center gap-2">
+            <i class="fa-solid fa-gamepad"></i> Estou Pronto para Jogar!
+          </a>
+        </div>
+      </div>
+
+      <!-- Controles Inferiores -->
+      <div class="flex items-center justify-between border-t border-slate-800 pt-4 mt-6">
+        <button id="prevBtn" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-bold transition flex items-center gap-2">
+          <i class="fa-solid fa-arrow-left"></i> Anterior
+        </button>
+
+        <span id="slideCounter" class="text-xs font-mono text-slate-400 font-bold">1 / 5</span>
+
+        <button id="nextBtn" class="px-5 py-2 rounded-xl btn-gradient-primary text-white text-xs font-bold transition flex items-center gap-2">
+          Próximo <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="py-4 text-center text-xs text-slate-500 border-t border-slate-900">
+    Torneio de Matemática • Regras do Jogo, Botão Pronto e Proteção Anti-Trapaça
+  </footer>
+
+  <script src="js/tutorial.js"></script>
+</body>
+</html>

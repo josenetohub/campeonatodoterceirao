@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Professor | Torneio de Matemática</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- MODAL DE SENHA DO PROFESSOR ("josenetomat") -->
+  <div id="passwordGateModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-6 md:p-8 space-y-5 border-2 border-indigo-500/40 text-center animate-slide-up">
+      <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-3xl mx-auto border border-indigo-500/30">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <div>
+        <h2 class="text-2xl font-black text-white">Área do Professor</h2>
+        <p class="text-xs text-slate-400 mt-1">Digite a senha de acesso pedagógico para gerenciar os torneios.</p>
+      </div>
+
+      <form id="passwordForm" class="space-y-4">
+        <div>
+          <input type="password" id="professorPasswordInput" placeholder="Senha do professor" required
+            class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-center text-lg font-mono tracking-widest focus:outline-none focus:border-indigo-500 transition">
+          <p id="passwordErrorMsg" class="hidden text-xs text-rose-400 font-bold mt-2">Senha incorreta. Tente novamente.</p>
+        </div>
+
+        <button type="submit" id="submitPasswordBtn" class="w-full py-3.5 rounded-xl btn-gradient-primary font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-key"></i> Entrar no Painel
+        </button>
+      </form>
+
+      <div class="pt-2">
+        <a href="index.html" class="text-xs text-slate-500 hover:text-slate-300 transition">
+          <i class="fa-solid fa-arrow-left"></i> Voltar ao Início
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-lg shadow">
+          <i class="fa-solid fa-chalkboard-user"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-white flex items-center gap-2">
+            Painel do Professor
+            <span id="activeTournamentBadge" class="hidden text-xs px-2.5 py-0.5 rounded-full font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"></span>
+          </h1>
+          <p class="text-xs text-slate-400">Chaveamento Dinâmico (~7 Alunos/Série) • Lobby ao Vivo • Anti-Trapaça</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button id="openPromptModalBtn" class="px-3 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 text-xs font-semibold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-robot"></i> Gerar Prompt IA
+        </button>
+        <a href="tutorial.html" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition flex items-center gap-1.5">
+          <i class="fa-solid fa-film"></i> Tutorial
+        </a>
+        <button id="logoutProfBtn" title="Sair do painel" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-300 text-xs transition">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Principal -->
+  <main class="flex-1 max-w-7xl mx-auto px-4 py-6 w-full space-y-6">
+
+    <!-- BANNER DE RETOMADA: Se já houver torneio em andamento -->
+    <div id="resumeBanner" class="hidden glass-card p-4 border-l-4 border-l-indigo-500 bg-indigo-950/20 flex flex-col md:flex-row items-center justify-between gap-3 animate-slide-up">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xl">
+          <i class="fa-solid fa-rotate"></i>
+        </div>
+        <div>
+          <h4 class="text-sm font-bold text-white">Torneio Ativo Encontrado: <span id="resumeTournamentTitle" class="text-indigo-300"></span> (<span id="resumeTournamentCode" class="font-mono text-amber-400"></span>)</h4>
+          <p class="text-xs text-slate-400">Continuar gerenciando a arena de onde você parou.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="resumeTournamentBtn" class="px-4 py-2 rounded-xl btn-gradient-primary font-bold text-xs flex items-center gap-1.5 shadow">
+          <i class="fa-solid fa-arrow-right"></i> Continuar Torneio
+        </button>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 1: CRIAÇÃO DO TORNEIO (Nome dos Alunos é Opcional!) -->
+    <section id="setupSection" class="space-y-6">
+      <div class="glass-card p-6 md:p-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold text-white">Criar Novo Torneio de Matemática</h2>
+            <p class="text-xs text-slate-400">A inserção de alunos é opcional! Eles podem se conectar pelo código e entrar no Lobby em tempo real.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          <!-- Coluna 1: Título, Tempo e Alunos Opcionais -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                Título do Torneio
+              </label>
+              <input type="text" id="tournamentTitle" value="Copa Matemática da Escola" 
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-indigo-500 transition text-sm">
+            </div>
+
+            <!-- CONFIGURAÇÃO DE TEMPO DA PARTIDA -->
+            <div class="p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-500/30 space-y-1.5">
+              <label class="block text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-stopwatch text-amber-400"></i> Tempo de Cada Jogo / Duelo
+              </label>
+              <div class="flex items-center gap-3">
+                <select id="timeLimitSelect" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-indigo-500">
+                  <option value="45">45 segundos (Rápido)</option>
+                  <option value="60">60 segundos (1 minuto)</option>
+                  <option value="90" selected>90 segundos (Padrão Recomendado)</option>
+                  <option value="120">120 segundos (2 minutos)</option>
+                  <option value="180">180 segundos (3 minutos)</option>
+                  <option value="0">Sem Limite de Tempo</option>
+                </select>
+                <span class="text-[11px] text-slate-400 whitespace-nowrap">Cronômetro ativo</span>
+              </div>
+            </div>
+
+            <!-- ALUNOS PARTICIPANTES (OPCIONAL) -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Alunos Participantes <span class="text-indigo-400 font-normal lowercase">(opcional)</span>
+                </label>
+                <button type="button" id="fillSamplePlayersBtn" class="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-1">
+                  <i class="fa-solid fa-dice"></i> Preencher c/ 8 Alunos Teste
+                </button>
+              </div>
+              <textarea id="playersListInput" rows="5" placeholder="(Opcional) Cole os nomes dos estudantes aqui ou DEIXE EM BRANCO para que eles entrem digitando o código da sala!"
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-sans text-sm focus:outline-none focus:border-indigo-500 transition leading-relaxed"></textarea>
+              <p class="text-xs text-slate-400 mt-1 flex items-center justify-between">
+                <span>Chaveamentos automáticos de ~7 estudantes por série (A, B, C, D...).</span>
+                <span id="playerCountBadge" class="font-bold text-indigo-400">0 pré-inscritos</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Coluna 2: Banco de Perguntas e Dicas -->
+          <div class="space-y-4">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                  Banco de Perguntas (Bloco de Texto)
+                </label>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="loadPresetBank('aritmetica')" class="text-xs px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+                    Aritmética
+                  </button>
+                  <button type="button" onclick="loadPresetBank('algebra')" class="text-xs px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+                    Álgebra
+                  </button>
+                  <button type="button" onclick="loadPresetBank('geometria')" class="text-xs px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+                    Geometria
+                  </button>
+                </div>
+              </div>
+
+              <textarea id="questionsTextInput" rows="8" placeholder="Pergunta: Quanto é 15 x 14?&#10;Resposta: 210&#10;Dica: Decomponha 14 em 10 + 4: (15x10) + (15x4)."
+                class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:outline-none focus:border-indigo-500 transition leading-relaxed"></textarea>
+
+              <div class="flex items-center justify-between mt-1">
+                <p class="text-[11px] text-slate-400">
+                  <i class="fa-solid fa-lightbulb text-amber-400"></i> Dica revelada na 2ª tentativa se ambos errarem.
+                </p>
+                <span id="questionCountBadge" class="text-xs font-bold text-emerald-400">0 questões</span>
+              </div>
+            </div>
+
+            <div class="pt-2">
+              <button id="createTournamentBtn" class="w-full py-3.5 px-6 rounded-xl btn-gradient-primary font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30">
+                <i class="fa-solid fa-door-open"></i> Criar Torneio e Abrir Sala
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 2: SALA DE CONTROLE / TORNEIO ATIVO -->
+    <section id="activeTournamentSection" class="hidden space-y-6">
+      
+      <!-- Top Bar com Código do Torneio, Tempo e Controles -->
+      <div class="glass-card p-5 border-l-4 border-l-amber-500">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-3">
+              <h2 id="liveTournamentTitle" class="text-2xl font-black text-white">Copa Matemática</h2>
+              <span id="tournamentStatusBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider">
+                Lobby Aberto
+              </span>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-slate-400 mt-1">
+              <span>Código da partida para a turma</span>
+              <span>•</span>
+              <span class="text-indigo-300 font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-stopwatch text-amber-400"></i> Tempo por duelo: <strong id="displayTimeLimit">90s</strong>
+              </span>
+              <span>•</span>
+              <span class="text-emerald-400 font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-shield-halved"></i> Anti-Trapaça Ativo
+              </span>
+            </div>
+          </div>
+
+          <!-- Código do Torneio em Destaque -->
+          <div class="flex items-center gap-3 bg-slate-900/90 border border-amber-500/30 p-2.5 rounded-2xl">
+            <div class="text-right">
+              <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider block">Código da Sala</span>
+              <span id="displayTournamentCode" class="text-2xl md:text-3xl font-black font-mono text-amber-400 tracking-widest select-all">---</span>
+            </div>
+            <button id="copyCodeBtn" title="Copiar Código" class="w-10 h-10 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 flex items-center justify-center text-sm transition">
+              <i class="fa-regular fa-copy"></i>
+            </button>
+          </div>
+
+          <!-- Botões de Ação do Professor -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="startTournamentBtn" class="px-5 py-2.5 rounded-xl btn-gradient-gold font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-amber-500/20">
+              <i class="fa-solid fa-play"></i> Iniciar Torneio
+            </button>
+            <button id="simulateRoundBtn" title="Avançar rodada com bots" class="px-3 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 font-semibold text-xs flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-robot"></i> Simular Bots
+            </button>
+            <button id="toggleStatsBtn" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-purple-300 border border-purple-500/30 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-chart-pie"></i> Ver Estatísticas
+            </button>
+            <button id="resetTournamentBtn" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-300 border border-slate-700 text-xs transition">
+              <i class="fa-solid fa-plus"></i> Novo Torneio
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LOBBY EM TEMPO REAL (Visível enquanto aguarda alunos entrarem) -->
+      <div id="lobbyWaitingCard" class="glass-card p-6 border-2 border-indigo-500/30 bg-slate-900/60 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              Lobby de Espera da Sala
+              <span id="lobbyCountBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">0 alunos conectados</span>
+            </h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="lobbyAddSampleBtn" class="text-xs px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 transition flex items-center gap-1">
+              <i class="fa-solid fa-user-plus"></i> Adicionar 8 Alunos Teste
+            </button>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-400">
+          Projete o código <strong id="lobbyCodeHighlight" class="text-amber-400 font-mono text-sm">---</strong> no projetor da sala. Os estudantes digitam seus nomes e entram automaticamente na lista abaixo!
+        </p>
+
+        <!-- Grid de Estudantes Conectados no Lobby -->
+        <div id="lobbyStudentsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 pt-2">
+          <div class="col-span-full py-6 text-center text-slate-500 text-xs italic">
+            Nenhum aluno conectado ainda. Peça para os estudantes abrirem o link e inserirem o código!
+          </div>
+        </div>
+      </div>
+
+      <!-- Banner de Pódio Dinâmico (Todas as Séries Geradas) -->
+      <div id="podiumBanner" class="hidden glass-card p-6 border-2 border-amber-500/40 bg-gradient-to-r from-amber-950/30 via-slate-900/80 to-purple-950/30 animate-slide-up">
+        <div class="text-center mb-5">
+          <span class="text-xs font-bold uppercase tracking-widest text-amber-400">🏆 Finais Concluídas</span>
+          <h3 class="text-xl font-black text-white">Galeria dos Grandes Campeões</h3>
+        </div>
+
+        <div id="dynamicPodiumGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        </div>
+      </div>
+
+      <!-- TELA PANORÂMICA DINÂMICA (COLUNAS DE TODAS AS SÉRIES ATIVAS: SÉRIE A, B, C, D, E...) -->
+      <div id="panoramicContainerWrap" class="hidden space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-xs text-slate-300">
+            <span class="font-bold text-white uppercase tracking-wider"><i class="fa-solid fa-network-wired text-indigo-400"></i> Arena Panorâmica em Tempo Real</span>
+            <span id="panoramicSubtitle" class="text-slate-400">(Chaveamentos de ~7 estudantes por série)</span>
+          </div>
+        </div>
+
+        <!-- Grid Dinâmico de Colunas das Séries -->
+        <div id="dynamicSeriesColumns" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
+        </div>
+      </div>
+
+      <!-- SEÇÃO EXPANSÍVEL: ESTATÍSTICAS INDIVIDUAIS E GRÁFICOS -->
+      <div id="statsSection" class="hidden glass-card p-6 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-purple-400"></i> Dados Individualizados & Métricas
+          </h3>
+          <span class="text-xs text-slate-400">Desempenho da turma em tempo real</span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Total de Alunos</span>
+            <div id="metricTotalPlayers" class="text-xl font-black text-white mt-0.5">0</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Partidas Jogadas</span>
+            <div id="metricMatchesPlayed" class="text-xl font-black text-indigo-400 mt-0.5">0</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Dicas Liberadas</span>
+            <div id="metricHintsGiven" class="text-xl font-black text-amber-400 mt-0.5">0</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <span class="text-[10px] text-slate-400 uppercase font-semibold">Aproveitamento Médio</span>
+            <div id="metricAvgAccuracy" class="text-xl font-black text-emerald-400 mt-0.5">0%</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+            <h4 class="text-xs font-bold text-slate-300 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-bullseye text-amber-400"></i> 1ª Tentativa vs 2ª Tentativa (com Dica)
+            </h4>
+            <div class="h-56">
+              <canvas id="chartAccuracy"></canvas>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+            <h4 class="text-xs font-bold text-slate-300 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-ranking-star text-indigo-400"></i> Aproveitamento dos Estudantes (%)
+            </h4>
+            <div class="h-56">
+              <canvas id="chartWinRate"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900/90 text-slate-400 uppercase font-semibold">
+              <tr>
+                <th class="py-2.5 px-3">Estudante</th>
+                <th class="py-2.5 px-2">Série Atual</th>
+                <th class="py-2.5 px-2 text-center">Partidas</th>
+                <th class="py-2.5 px-2 text-center">Vitórias</th>
+                <th class="py-2.5 px-2 text-center">1ª Tent.</th>
+                <th class="py-2.5 px-2 text-center">2ª c/ Dica</th>
+                <th class="py-2.5 px-2 text-center">Aproveitamento</th>
+                <th class="py-2.5 px-2 text-right">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="studentStatsTableBody" class="divide-y divide-slate-800/80 text-slate-200">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL: Gerador de Prompt para IA -->
+  <div id="promptModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-card max-w-2xl w-full p-6 space-y-5 border border-purple-500/30">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-purple-600/30 text-purple-300 flex items-center justify-center">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white">Gerador de Prompt para IA</h3>
+        </div>
+        <button onclick="closePromptModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Tema / Conteúdo</label>
+          <input type="text" id="promptTopicInput" value="Frações, Porcentagem e Equações do 1º Grau"
+            class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Nível de Ensino</label>
+          <input type="text" id="promptGradeInput" value="7º e 8º ano do Ensino Fundamental"
+            class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Quantidade de Perguntas</label>
+          <input type="number" id="promptCountInput" value="12" min="4" max="30"
+            class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Dificuldade</label>
+          <select id="promptDifficultyInput" class="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white">
+            <option value="Misto (Fácil, Médio, Desafio)">Misto (Fácil, Médio, Desafio)</option>
+            <option value="Fácil (Foco em Agilidade)">Fácil (Foco em Agilidade)</option>
+            <option value="Médio (Raciocínio Estratégico)">Médio (Raciocínio Estratégico)</option>
+            <option value="Avançado / Olimpíadas">Avançado / Olimpíadas</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <label class="text-xs font-semibold text-purple-300">Prompt Pronto para Copiar e Colar na IA:</label>
+          <button id="copyPromptBtn" class="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-semibold">
+            <i class="fa-regular fa-copy"></i> Copiar Texto
+          </button>
+        </div>
+        <textarea id="generatedPromptText" rows="6" readonly
+          class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 font-mono text-[11px] leading-relaxed"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button onclick="closePromptModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+          Fechar
+        </button>
+        <button id="applyPromptBtn" class="px-4 py-2 rounded-lg btn-gradient-primary text-xs font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-copy"></i> Copiar para Área de Transferência
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Detalhes do Estudante -->
+  <div id="studentDetailModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="glass-card max-w-xl w-full p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 id="modalStudentName" class="text-lg font-bold text-white">Histórico do Aluno</h3>
+        <button onclick="closeStudentModal()" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="modalStudentBody" class="space-y-3 max-h-96 overflow-y-auto pr-1 text-xs">
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/socket-client.js"></script>
+  <script src="js/professor.js"></script>
+</body>
+</html>

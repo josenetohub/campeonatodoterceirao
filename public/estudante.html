@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal do Estudante | Duelo Matemático</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Animação do Countdown 3.. 2.. 1.. */
+    @keyframes countPop {
+      0% { transform: scale(0.4); opacity: 0; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-count-pop {
+      animation: countPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between select-none">
+
+  <!-- MODAL ANTI-TRAPAÇA: DERROTA POR DESCLASSIFICAÇÃO (TROCA DE ABA) -->
+  <div id="cheatDisqualifiedModal" class="hidden fixed inset-0 bg-rose-950/95 backdrop-blur-lg z-50 flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-8 space-y-5 border-4 border-rose-600 text-center animate-slide-up shadow-2xl">
+      <div class="w-20 h-20 rounded-full bg-rose-600/30 text-rose-400 flex items-center justify-center text-4xl mx-auto border-2 border-rose-500 animate-bounce">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <div>
+        <span class="px-3 py-1 rounded-full bg-rose-600 text-white text-[11px] font-black uppercase tracking-widest">
+          Cartão Vermelho
+        </span>
+        <h2 class="text-2xl font-black text-white mt-3">DERROTA POR DESCLASSIFICAÇÃO!</h2>
+        <p class="text-xs text-rose-200 mt-2 leading-relaxed">
+          Você <strong>saiu da tela ou trocou de aba</strong> durante o cálculo da partida!
+        </p>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-slate-950/90 border border-rose-500/40 text-left text-xs text-slate-300 space-y-1.5">
+        <div class="font-bold text-rose-400 flex items-center gap-1.5">
+          <i class="fa-solid fa-shield-halved"></i> Tecnologia Anti-Trapaça Ativada
+        </div>
+        <p class="text-[11px] text-slate-400">
+          Para garantir uma disputa justa sem uso de Inteligência Artificial, redes sociais ou buscas na internet, a saída da tela resulta em derrota imediata. A vitória da rodada foi concedida ao seu oponente.
+        </p>
+      </div>
+
+      <div class="pt-2">
+        <button onclick="dismissCheatModal()" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition">
+          Entendido, Continuar no Torneio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY COUNTDOWN 3.. 2.. 1.. -->
+  <div id="countdownOverlay" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-40 flex items-center justify-center">
+    <div class="text-center space-y-3">
+      <span class="text-xs uppercase font-bold text-amber-400 tracking-widest block">Prepare-se!</span>
+      <div id="countdownNumber" class="text-8xl md:text-9xl font-black text-white animate-count-pop font-mono drop-shadow-[0_0_35px_rgba(245,158,11,0.6)]">
+        3
+      </div>
+      <p class="text-sm text-slate-300 font-semibold">Os dois apertaram Pronto! A pergunta vai aparecer...</p>
+    </div>
+  </div>
+
+  <!-- Header Simples -->
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur py-3 px-4">
+    <div class="max-w-2xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <a href="index.html" class="text-slate-400 hover:text-white text-sm mr-1">
+          <i class="fa-solid fa-arrow-left"></i>
+        </a>
+        <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm font-bold">
+          <i class="fa-solid fa-gamepad"></i>
+        </span>
+        <span class="font-bold text-sm tracking-tight text-white">Arena do Estudante</span>
+      </div>
+
+      <div id="studentHeaderBadge" class="hidden flex items-center gap-2">
+        <span id="studentSeriesBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold badge-serie-a">Série A</span>
+        <span id="studentNameDisplay" class="text-xs font-semibold text-slate-300">Aluno</span>
+        <button id="leaveTournamentBtn" title="Sair da sala" class="text-slate-500 hover:text-rose-400 text-xs ml-1">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container Central -->
+  <main class="flex-1 max-w-2xl mx-auto w-full px-4 py-6 flex flex-col justify-center">
+
+    <!-- TELA 1: LOGIN NO TORNEIO -->
+    <div id="loginScreen" class="glass-card p-6 md:p-8 space-y-6">
+      <div class="text-center space-y-2">
+        <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mx-auto border border-amber-500/30">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+        <h2 class="text-2xl font-black text-white tracking-tight">Entrar na Arena de Duelos</h2>
+        <p class="text-xs text-slate-400">Insira o código fornecido pelo professor e seu nome de jogador.</p>
+      </div>
+
+      <form id="joinForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            Código do Torneio
+          </label>
+          <input type="text" id="tournamentCodeInput" placeholder="Ex: MAT-742" required
+            class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-amber-400 font-mono text-xl font-bold tracking-widest text-center uppercase focus:outline-none focus:border-amber-500 transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            Seu Nome Completo
+          </label>
+          <input type="text" id="studentNameInput" placeholder="Digite seu nome" required
+            class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-base focus:outline-none focus:border-amber-500 transition">
+        </div>
+
+        <button type="submit" id="joinBtn" class="w-full py-3.5 rounded-xl btn-gradient-gold font-bold text-base shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-play"></i> Acessar Partida
+        </button>
+      </form>
+
+      <div class="text-center">
+        <a href="tutorial.html" target="_blank" class="text-xs text-slate-400 hover:text-amber-400 transition inline-flex items-center gap-1.5">
+          <i class="fa-solid fa-circle-question"></i> Como funciona o torneio e as dicas? Ver Tutorial
+        </a>
+      </div>
+    </div>
+
+    <!-- TELA 2: SALA DE ESPERA -->
+    <div id="waitingScreen" class="hidden glass-card p-8 text-center space-y-5 animate-slide-up">
+      <div class="w-16 h-16 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-3xl mx-auto animate-pulse">
+        <i class="fa-solid fa-hourglass-half"></i>
+      </div>
+      <div>
+        <h3 id="waitingTitle" class="text-xl font-bold text-white mb-2">Aguardando Próxima Fase</h3>
+        <p id="waitingMessage" class="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
+          O professor está organizando o chaveamento. Fique pronto para o cálculo!
+        </p>
+      </div>
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 text-xs text-slate-400 border border-slate-800">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        Conectado ao Torneio
+      </div>
+    </div>
+
+    <!-- TELA 3: DUELO MATEMÁTICO -->
+    <div id="matchScreen" class="hidden space-y-4 animate-slide-up">
+      
+      <!-- Card Focado: Oponente + Meta de Vitórias Restantes + Cronômetro -->
+      <div class="glass-card p-5 border-t-4 border-t-amber-500">
+        <div class="flex items-center justify-between gap-4">
+          
+          <!-- Você -->
+          <div class="flex items-center gap-3">
+            <div class="avatar-badge">
+              <span>😎</span>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Você</span>
+              <h4 id="myPlayerName" class="text-base font-bold text-white">Eu</h4>
+            </div>
+          </div>
+
+          <!-- VS e Cronômetro Digital -->
+          <div class="text-center px-2 flex flex-col items-center gap-1">
+            <span class="text-xs font-black px-2 py-0.5 rounded bg-slate-900 text-amber-400 border border-amber-500/30">
+              VS
+            </span>
+            <div id="studentTimerBox" class="hidden text-xs font-mono font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-500/30">
+              ⏳ <span id="studentTimerText">00:00</span>
+            </div>
+          </div>
+
+          <!-- Oponente Atual -->
+          <div class="flex items-center gap-3 text-right flex-row-reverse">
+            <div class="avatar-badge bg-gradient-to-tr from-rose-500 to-amber-500">
+              <span>🎯</span>
+            </div>
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Seu Oponente</span>
+              <h4 id="opponentName" class="text-base font-bold text-amber-300">Carregando...</h4>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Indicador de Jogos Restantes para Vencer o Torneio -->
+        <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-bullseye text-amber-400 text-sm"></i>
+            <span id="motivationalGoalText" class="text-xs font-bold text-amber-300">
+              Faltam 2 vitórias para ganhar o torneio!
+            </span>
+          </div>
+          <span id="matchRoundBadge" class="text-[11px] font-mono text-slate-400 font-semibold">
+            Rodada 1
+          </span>
+        </div>
+      </div>
+
+      <!-- Banner de Rebaixamento -->
+      <div id="relegationAlert" class="hidden p-4 rounded-xl bg-gradient-to-r from-blue-950/60 to-slate-900 border border-blue-500/40 text-xs text-blue-200 flex items-center gap-3 animate-slide-up">
+        <div class="text-xl text-blue-400">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <strong class="font-bold text-white block">Nova Oportunidade!</strong>
+          Você agora disputa o troféu da <span id="relegationSeriesName" class="font-bold text-blue-300">Série B</span>. Ninguém é eliminado, continue lutando!
+        </div>
+      </div>
+
+      <!-- Banner de Desempate -->
+      <div id="tieAlert" class="hidden p-4 rounded-xl bg-gradient-to-r from-purple-950/70 to-slate-900 border border-purple-500/40 text-xs text-purple-200 flex items-center gap-3 animate-slide-up">
+        <div class="text-xl text-purple-400">
+          <i class="fa-solid fa-scale-balanced animate-pulse"></i>
+        </div>
+        <div>
+          <strong class="font-bold text-white block">Duelo Empatado!</strong>
+          <span id="tieAlertMsg">Ambos responderam! Nova questão gerada para desempate.</span>
+        </div>
+      </div>
+
+      <!-- FASE A: BOTÃO "ESTOU PRONTO" (Exibido antes da pergunta) -->
+      <div id="readySection" class="glass-card p-6 text-center space-y-4">
+        <div class="w-14 h-14 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-2xl mx-auto">
+          <i class="fa-solid fa-flag-checkered"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Preparado para o Duelo?</h3>
+          <p id="readyOpponentStatusText" class="text-xs text-slate-400 mt-1">
+            Aperte "Pronto" quando estiver a postos. A partida começará com contagem regressiva quando ambos estiverem prontos!
+          </p>
+        </div>
+
+        <button type="button" id="playerReadyBtn" class="w-full py-4 rounded-xl btn-gradient-primary font-black text-base shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-bolt"></i> ESTOU PRONTO! 🚀
+        </button>
+      </div>
+
+      <!-- FASE B: DESAFIO MATEMÁTICO (Liberado somente após countdown de 3s) -->
+      <div id="questionSection" class="glass-card p-6 space-y-4 hidden">
+        <div class="flex items-center justify-between text-xs text-slate-400">
+          <span class="font-semibold uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-calculator text-indigo-400"></i> Desafio Matemático
+          </span>
+          <span id="attemptsBadge" class="px-2.5 py-0.5 rounded-full bg-slate-900 text-slate-300 font-bold border border-slate-800">
+            Tentativa 1 de 2
+          </span>
+        </div>
+
+        <!-- Texto da Pergunta -->
+        <div id="questionText" class="text-lg md:text-xl font-medium text-white py-3 leading-relaxed text-center">
+          Carregando pergunta...
+        </div>
+
+        <!-- Dica de Ouro -->
+        <div id="hintContainer" class="p-4 rounded-xl gold-hint-box text-xs space-y-1 hidden animate-slide-up">
+          <div class="flex items-center gap-2 font-bold text-amber-300 text-sm">
+            <i class="fa-solid fa-lightbulb text-amber-400 animate-bounce"></i>
+            DICA DO MESTRE LIBERADA! (Segunda Tentativa)
+          </div>
+          <p id="hintText" class="text-slate-200 text-xs md:text-sm leading-relaxed pl-6">
+            Dica de resolução...
+          </p>
+        </div>
+
+        <!-- Estado de Espera do Oponente -->
+        <div id="waitingOpponentBanner" class="hidden p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/30 text-xs text-center space-y-2 animate-slide-up">
+          <div class="inline-flex items-center gap-2 text-indigo-300 font-bold">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+            Resposta registrada!
+          </div>
+          <p class="text-slate-300">
+            Aguardando seu oponente responder para a IA comparar simultaneamente.
+          </p>
+        </div>
+
+        <!-- Formulário de Resposta -->
+        <form id="answerForm" class="space-y-3 pt-2">
+          <div class="relative">
+            <input type="text" id="answerInput" placeholder="Digite seu cálculo ou resposta" autocomplete="off" required
+              class="w-full px-4 py-3.5 rounded-xl bg-slate-900 border-2 border-slate-700 text-white font-mono text-lg text-center font-bold focus:outline-none focus:border-indigo-500 transition">
+          </div>
+
+          <!-- Teclado Rápido de Símbolos -->
+          <div class="flex items-center justify-center gap-1.5 flex-wrap text-xs">
+            <button type="button" onclick="insertSymbol('+')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-mono font-bold">+</button>
+            <button type="button" onclick="insertSymbol('-')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-mono font-bold">-</button>
+            <button type="button" onclick="insertSymbol('x')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-mono font-bold">×</button>
+            <button type="button" onclick="insertSymbol('/' )" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-mono font-bold">÷</button>
+            <button type="button" onclick="insertSymbol('^2')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-mono font-bold">x²</button>
+            <button type="button" onclick="insertSymbol('sqrt')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-mono font-bold">√</button>
+            <button type="button" onclick="insertSymbol('%')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-mono font-bold">%</button>
+            <button type="button" onclick="clearAnswer()" class="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/40 text-xs">Limpar</button>
+          </div>
+
+          <button type="submit" id="submitAnswerBtn" class="w-full py-3.5 rounded-xl btn-gradient-primary font-bold text-base shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i> Enviar Resposta para a IA
+          </button>
+        </form>
+
+        <div id="feedbackBanner" class="hidden p-3.5 rounded-xl text-center text-xs font-bold animate-slide-up">
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TELA 4: CAMPEÃO OU RESULTADO FINAL COM TEMA DINÂMICO DA SÉRIE -->
+    <div id="finishScreen" class="hidden glass-card p-8 md:p-10 text-center space-y-6 animate-slide-up transition-all duration-500">
+      <div>
+        <span id="finishSeriesBadge" class="px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-widest inline-flex items-center gap-1.5 shadow">
+          Série A
+        </span>
+      </div>
+
+      <div id="finishIconContainer" class="w-24 h-24 rounded-full flex items-center justify-center text-5xl mx-auto transition-all duration-500 shadow-2xl">
+        <i id="finishIcon" class="fa-solid fa-crown"></i>
+      </div>
+
+      <div class="space-y-2">
+        <h3 id="finishTitle" class="text-2xl md:text-3xl font-black text-white tracking-tight">
+          🏆 GRANDE CAMPEÃO!
+        </h3>
+        <p id="finishSubtitle" class="text-xs font-bold uppercase tracking-wider text-amber-400">
+          Troféu da Série
+        </p>
+        <p id="finishMessage" class="text-sm text-slate-200 max-w-md mx-auto leading-relaxed pt-1">
+          Parabéns! Você conquistou o troféu!
+        </p>
+      </div>
+
+      <div class="pt-4 flex items-center justify-center gap-3">
+        <a href="index.html" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold inline-flex items-center gap-2 transition">
+          <i class="fa-solid fa-house"></i> Voltar ao Início
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="py-4 text-center text-[11px] text-slate-500 border-t border-slate-900">
+    Torneio de Matemática • Detecção Anti-Trapaça e Séries Integradas
+  </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/socket-client.js"></script>
+  <script src="js/estudante.js"></script>
+</body>
+</html>
