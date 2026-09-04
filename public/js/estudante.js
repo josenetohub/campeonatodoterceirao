@@ -36,6 +36,7 @@ const motivationalGoalText = document.getElementById("motivationalGoalText");
 const matchRoundBadge = document.getElementById("matchRoundBadge");
 const studentTimerBox = document.getElementById("studentTimerBox");
 const studentTimerText = document.getElementById("studentTimerText");
+const matchScoreDisplay = document.getElementById("matchScoreDisplay");
 
 // Seções de Pronto e Desafio
 const readySection = document.getElementById("readySection");
@@ -127,19 +128,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Desempate
-  window.SocketClient.on("tie_occurred", data => {
-    window.SoundFX.playTone(440, 0.2);
-    setTimeout(() => window.SoundFX.playTone(550, 0.3), 150);
-
+  // Nova rodada com pergunta aleatória sem repetição e placar
+  const handleNewQuestionRound = data => {
     waitingOpponentBanner.classList.add("hidden");
     enableInputForNextTurn();
-    tieAlert.classList.remove("hidden");
-    if (data && data.message) {
-      tieAlertMsg.innerText = data.message;
+    hintContainer.classList.add("hidden");
+
+    if (data && (data.newQuestion || data.question)) {
+      renderMathQuestion(data.newQuestion || data.question);
     }
-    showFeedback("🤝 Duelo empatado! Nova pergunta gerada para desempate!", "purple");
-  });
+
+    if (data && data.message) {
+      showFeedback(data.message, "indigo");
+    }
+
+    window.SoundFX.playTone(520, 0.15);
+  };
+
+  window.SocketClient.on("round_scored", handleNewQuestionRound);
+  window.SocketClient.on("tie_occurred", handleNewQuestionRound);
 
   // Alertas de Desclassificação Anti-Trapaça
   window.SocketClient.on("disqualified_alert", () => {
@@ -427,8 +434,12 @@ function renderStudentView(view) {
   currentMatchId = view.matchId;
 
   opponentName.innerText = view.opponent?.name || "Adversário";
-  motivationalGoalText.innerText = view.motivationalGoal || `Faltam ${view.gamesNeededToWin} vitórias para o Troféu!`;
+  motivationalGoalText.innerText = view.motivationalGoal || `Placar: ${view.myScore || 0} × ${view.opponentScore || 0}`;
   matchRoundBadge.innerText = `Rodada ${view.round}`;
+
+  if (matchScoreDisplay) {
+    matchScoreDisplay.innerText = view.scoreFormatted || `${view.myScore || 0} × ${view.opponentScore || 0}`;
+  }
 
   if (view.currentSeries !== lastSeries && (view.currentSeries === "B" || view.currentSeries === "C")) {
     relegationAlert.classList.remove("hidden");
@@ -568,25 +579,41 @@ function handleSubmitAnswer(e) {
 
     waitingOpponentBanner.classList.add("hidden");
 
-    if (res.isTie) {
-      enableInputForNextTurn();
-      tieAlert.classList.remove("hidden");
-      showFeedback(res.message, "purple");
-    } else if (res.event === "HINT_UNLOCKED") {
+    if (res.matchFinished) {
+      isMatchQuestionActive = false;
+      answerInput.value = "";
+
+      if (res.winnerId === currentStudentId) {
+        window.SoundFX.victory();
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        showFeedback(`🎉 VITÓRIA NA DISPUTA! ${res.message}`, "emerald");
+      } else {
+        window.SoundFX.wrong();
+        showFeedback(`❌ Oponente venceu a disputa. ${res.message}`, "rose");
+      }
+      return;
+    }
+
+    // A partida continua: ou dica liberada ou nova questão sorteada
+    if (res.event === "HINT_UNLOCKED") {
       enableInputForNextTurn();
       hintContainer.classList.remove("hidden");
       hintText.innerText = res.hint;
       showFeedback("💡 Ambos erraram na 1ª tentativa! A DICA DE OURO foi liberada para a 2ª tentativa.", "amber");
-    } else if (res.isCorrect) {
-      isMatchQuestionActive = false;
-      window.SoundFX.correct();
-      confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
-      showFeedback("🎉 RESPOSTA CORRETA! Você venceu este duelo e avançou de fase!", "emerald");
-      answerInput.value = "";
     } else {
-      isMatchQuestionActive = false;
-      window.SoundFX.wrong();
-      showFeedback("❌ Oponente acertou a questão e avançou. Você continua firme na próxima série!", "rose");
+      enableInputForNextTurn();
+      hintContainer.classList.add("hidden");
+
+      if (res.newQuestion) {
+        renderMathQuestion(res.newQuestion);
+      }
+
+      if (res.isCorrect) {
+        window.SoundFX.correct();
+        showFeedback(`✅ Ponto marcado! ${res.message}`, "emerald");
+      } else {
+        showFeedback(res.message, "indigo");
+      }
     }
   });
 }

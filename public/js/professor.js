@@ -489,12 +489,19 @@ function renderMatchesHtml(seriesKey, matches) {
       statusPill = `<span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-500/20 text-amber-400 animate-pulse">Em Duelo</span>`;
     }
 
+    const p1Score = m.score ? (m.score[m.player1.id] || 0) : (m.p1Score || 0);
+    const p2Score = m.score ? (m.score[m.player2.id] || 0) : (m.p2Score || 0);
     const timerDisplay = getMatchRemainingTimeText(m);
 
     html += `
       <div class="p-3.5 rounded-xl bg-slate-900/90 border ${isFinished ? 'border-slate-800 opacity-90' : 'border-indigo-500/40 shadow-md shadow-indigo-500/10'} space-y-2.5">
         <div class="flex items-center justify-between text-[11px] border-b border-slate-800/80 pb-1.5">
-          <span class="font-bold text-slate-300">Rodada ${m.round}</span>
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-slate-300">R${m.round}</span>
+            <span class="px-2 py-0.5 rounded bg-indigo-950/90 text-amber-300 font-mono font-bold text-[10px] border border-indigo-500/30">
+              ${p1Score} × ${p2Score}
+            </span>
+          </div>
           <div class="flex items-center gap-1.5">
             ${timerDisplay}
             ${statusPill}
@@ -507,6 +514,7 @@ function renderMatchesHtml(seriesKey, matches) {
             <div class="flex items-center gap-2">
               <span>${p1Winner ? '👑' : (m.disqualifiedId === m.player1.id ? '🚨' : '👤')}</span>
               <span class="${m.disqualifiedId === m.player1.id ? 'line-through text-rose-400' : ''}">${m.player1.name}</span>
+              <span class="font-bold text-amber-400 text-[10px]">(${p1Score} pt${p1Score !== 1 ? 's' : ''})</span>
               ${!isFinished ? p1ReadyBadge : ''}
               ${m.player1.hasSubmittedTurn ? '<span class="text-[9px] text-indigo-300 font-bold">Enviou ✓</span>' : ''}
             </div>
@@ -520,6 +528,7 @@ function renderMatchesHtml(seriesKey, matches) {
             <div class="flex items-center gap-2">
               <span>${p2Winner ? '👑' : (m.disqualifiedId === m.player2.id ? '🚨' : '👤')}</span>
               <span class="${m.disqualifiedId === m.player2.id ? 'line-through text-rose-400' : ''}">${m.player2.name}</span>
+              <span class="font-bold text-amber-400 text-[10px]">(${p2Score} pt${p2Score !== 1 ? 's' : ''})</span>
               ${!isFinished ? p2ReadyBadge : ''}
               ${m.player2.hasSubmittedTurn ? '<span class="text-[9px] text-indigo-300 font-bold">Enviou ✓</span>' : ''}
             </div>

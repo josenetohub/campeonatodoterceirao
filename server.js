@@ -466,9 +466,18 @@ io.on("connection", socket => {
       if (result.event === "HINT_UNLOCKED") {
         io.to(`${tCode}_student_${match.player1.id}`).emit("hint_unlocked", { hint: match.question.hint });
         io.to(`${tCode}_student_${match.player2.id}`).emit("hint_unlocked", { hint: match.question.hint });
-      } else if (result.event === "TIE_BOTH_CORRECT" || result.event === "TIE_BOTH_FAILED") {
-        io.to(`${tCode}_student_${match.player1.id}`).emit("tie_occurred", { message: result.message, question: match.question.question });
-        io.to(`${tCode}_student_${match.player2.id}`).emit("tie_occurred", { message: result.message, question: match.question.question });
+      } else if (!result.matchFinished && result.newQuestion) {
+        const roundData = {
+          message: result.message,
+          question: match.question.question,
+          newQuestion: match.question.question,
+          p1Score: result.p1Score,
+          p2Score: result.p2Score
+        };
+        io.to(`${tCode}_student_${match.player1.id}`).emit("round_scored", roundData);
+        io.to(`${tCode}_student_${match.player2.id}`).emit("round_scored", roundData);
+        io.to(`${tCode}_student_${match.player1.id}`).emit("tie_occurred", roundData);
+        io.to(`${tCode}_student_${match.player2.id}`).emit("tie_occurred", roundData);
       }
     }
 
