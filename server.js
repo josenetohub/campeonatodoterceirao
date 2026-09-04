@@ -374,7 +374,7 @@ io.on("connection", socket => {
   // ESTUDANTE: Clicar em "PRONTO"
   socket.on("player_ready", (data, callback) => {
     const { code, playerId, matchId } = data || {};
-    const tCode = code || currentTournamentCode;
+    const tCode = (code || currentTournamentCode || "").toUpperCase().trim();
     const engine = activeTournaments.get(tCode);
     if (!engine) {
       if (typeof callback === "function") callback({ success: false, error: "Torneio não ativo." });
@@ -405,8 +405,14 @@ io.on("connection", socket => {
 
         io.to(`${tCode}_student_${match.player1.id}`).emit("student_view_updated", engine.getStudentView(match.player1.id));
         io.to(`${tCode}_student_${match.player2.id}`).emit("student_view_updated", engine.getStudentView(match.player2.id));
-        io.to(`${tCode}_student_${match.player1.id}`).emit("question_released", { timeLimit: match.timeLimitSeconds });
-        io.to(`${tCode}_student_${match.player2.id}`).emit("question_released", { timeLimit: match.timeLimitSeconds });
+        io.to(`${tCode}_student_${match.player1.id}`).emit("question_released", {
+          question: match.question.question,
+          timeLimit: match.timeLimitSeconds
+        });
+        io.to(`${tCode}_student_${match.player2.id}`).emit("question_released", {
+          question: match.question.question,
+          timeLimit: match.timeLimitSeconds
+        });
         io.to(`${tCode}_professor`).emit("professor_view_updated", engine.getProfessorView());
       }, 3000);
     }
@@ -415,7 +421,7 @@ io.on("connection", socket => {
   // ANTI-TRAPAÇA: Troca de aba
   socket.on("cheat_detected", (data, callback) => {
     const { code, playerId, matchId, reason } = data || {};
-    const tCode = code || currentTournamentCode;
+    const tCode = (code || currentTournamentCode || "").toUpperCase().trim();
     const engine = activeTournaments.get(tCode);
     if (!engine) return;
 
@@ -445,7 +451,7 @@ io.on("connection", socket => {
   // ESTUDANTE: Enviar Resposta
   socket.on("submit_answer", (data, callback) => {
     const { code, playerId, matchId, answer } = data || {};
-    const tCode = code || currentTournamentCode;
+    const tCode = (code || currentTournamentCode || "").toUpperCase().trim();
     const engine = activeTournaments.get(tCode);
     if (!engine) {
       if (typeof callback === "function") callback({ success: false, error: "Torneio não ativo." });

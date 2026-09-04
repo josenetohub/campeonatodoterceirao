@@ -108,6 +108,10 @@ document.addEventListener("DOMContentLoaded", () => {
     questionSection.classList.remove("hidden");
     answerInput.focus();
 
+    if (data && (data.question || data.text)) {
+      renderMathQuestion(data.question || data.text);
+    }
+
     if (data && data.timeLimit > 0) {
       startMatchClock(data.timeLimit);
     }
@@ -433,17 +437,21 @@ function renderStudentView(view) {
   showScreen(matchScreen);
   currentMatchId = view.matchId;
 
-  opponentName.innerText = view.opponent?.name || "Adversário";
-  motivationalGoalText.innerText = view.motivationalGoal || `Placar: ${view.myScore || 0} × ${view.opponentScore || 0}`;
-  matchRoundBadge.innerText = `Rodada ${view.round}`;
+  if (opponentName) opponentName.innerText = view.opponent?.name || "Adversário";
+  if (motivationalGoalText) motivationalGoalText.innerText = view.motivationalGoal || `Placar: ${view.myScore || 0} × ${view.opponentScore || 0}`;
+  if (matchRoundBadge) matchRoundBadge.innerText = `Rodada ${view.round || 1}`;
 
   if (matchScoreDisplay) {
     matchScoreDisplay.innerText = view.scoreFormatted || `${view.myScore || 0} × ${view.opponentScore || 0}`;
   }
+  const matchTargetEl = document.getElementById("matchTargetScoreText");
+  if (matchTargetEl) {
+    matchTargetEl.innerText = `🎯 Acertar ${view.targetScore || 3}+ para vencer`;
+  }
 
   if (view.currentSeries !== lastSeries && (view.currentSeries === "B" || view.currentSeries === "C")) {
-    relegationAlert.classList.remove("hidden");
-    relegationSeriesName.innerText = view.seriesName;
+    if (relegationAlert) relegationAlert.classList.remove("hidden");
+    if (relegationSeriesName) relegationSeriesName.innerText = view.seriesName;
     lastSeries = view.currentSeries;
   }
 
@@ -475,7 +483,10 @@ function renderStudentView(view) {
     questionSection.classList.remove("hidden");
     isMatchQuestionActive = true;
 
-    renderMathQuestion(view.question?.text || "");
+    const qText = view.question?.text || view.question?.question || "";
+    if (qText && qText !== "Aguardando início...") {
+      renderMathQuestion(qText);
+    }
 
     if (view.timeLimitSeconds > 0 && view.startedAtQuestion) {
       const elapsed = Math.floor((Date.now() - view.startedAtQuestion) / 1000);
@@ -525,14 +536,34 @@ function enableInputForNextTurn() {
 }
 
 function renderMathQuestion(text) {
-  questionText.innerText = text;
+  if (!questionText) return;
+  if (!text || String(text).trim() === "") {
+    questionText.innerHTML = '<span class="text-slate-400 text-sm animate-pulse"><i class="fa-solid fa-spinner fa-spin text-indigo-400"></i> Preparando pergunta...</span>';
+    return;
+  }
+
+  let cleanText = String(text).trim();
+  cleanText = cleanText
+    .replace(/\\times/g, "×")
+    .replace(/\\div/g, "÷")
+    .replace(/\\sqrt\{([^}]+)\}/g, "√$1")
+    .replace(/\\sqrt/g, "√")
+    .replace(/\\%/g, "%");
+
+  questionText.innerText = cleanText;
+
   try {
-    if (window.katex && (text.includes("\\") || text.includes("^") || text.includes("_"))) {
-      const mathFormatted = text.replace(/\\times/g, "×").replace(/\\div/g, "÷");
-      questionText.innerHTML = mathFormatted;
+    if (window.katex && cleanText.includes("$")) {
+      questionText.innerHTML = cleanText.replace(/\$([^$]+)\$/g, (m, formula) => {
+        try {
+          return window.katex.renderToString(formula, { throwOnError: false });
+        } catch {
+          return formula;
+        }
+      });
     }
   } catch (e) {
-    questionText.innerText = text;
+    questionText.innerText = cleanText;
   }
 }
 
